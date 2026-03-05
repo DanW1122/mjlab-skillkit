@@ -1,0 +1,20 @@
+---
+description: IsaacLab-to-mjlab migration guardrails
+globs:
+  - "**/*.py"
+alwaysApply: false
+---
+
+# IsaacLab -> mjlab Migration Guardrails
+
+- Use `mujocolab/anymal_c_velocity` as the migration pattern.
+- Do not modify `mujocolab/mjlab` source.
+- Keep behavior equivalent for rewards/obs/actions/commands/reset/termination/curriculum.
+- Must be mjlab-native after migration.
+- No compat layer, adapter shim, or bridge wrapper.
+- No new fallback logic unless source task has it.
+- No new `raise`/`assert` unless source task has it.
+- Keep source comments/TODO semantics.
+- Manager config must be dict-based (`dict[str, XxxTermCfg]`), no manager `@configclass`.
+- Remove IsaacLab API remnants after migration.
+- Ask user to choose `preserve-layout` or `mjlab-layout` before migration if not specified.

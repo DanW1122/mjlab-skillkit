@@ -1,0 +1,4 @@
+interface:
+  display_name: "IsaacLab -> mjlab Migration"
+  short_description: "Migrate IsaacLab-only projects to mjlab with strict parity"
+  default_prompt: "Use $isaaclab-to-mjlab to migrate this IsaacLab project to mjlab. Ask me to choose layout mode first (preserve-layout or mjlab-layout), enforce dict-based managers, remove IsaacLab residue, and keep behavior equivalent without compatibility layers."
