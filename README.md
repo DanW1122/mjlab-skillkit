@@ -13,6 +13,8 @@ The objective is to preserve task behavior during migration while also making it
 
 It now also ships a modular **mjlab API skill pack** distilled from local `mjlab/docs`, so the agent can load only the relevant API domain during migration (envs, managers, sensors, terrains, RL, task registry, etc.).
 
+It works even when the current workspace does not contain a local `mjlab/` checkout: the bundled `references/` pages are the first fallback, and raw `mjlab/docs/...` or `mjlab/src/...` paths are treated as optional lookup targets rather than hard requirements.
+
 ## Why this is AI-friendly
 
 - **English-first agent-facing docs** so Codex/Claude/Gemini/Cursor/OpenCode can consume the guidance consistently.

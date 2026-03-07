@@ -3,7 +3,7 @@
 ## Goal
 
 - Migrate projects built on IsaacLab to mjlab with behavior equivalence.
-- Or author new mjlab-native tasks/components directly from local docs and examples.
+- Or author new mjlab-native tasks/components directly from local or bundled docs and examples.
 - In migration mode, keep rewards, observations, actions, commands, reset/events, terminations, and curriculum equivalent.
 - Use `mujocolab/anymal_c_velocity` as the primary migration pattern when migrating.
 
@@ -18,8 +18,9 @@
 - Do not modify `mujocolab/mjlab` source code.
 - Final implementation must be mjlab-native.
 - No compatibility layer / adapter shim / bridge wrappers.
-- In migration mode: no new fallback logic unless source has it.
-- In migration mode: no new `raise`/`assert` unless source has it.
+- In migration mode: preserve behavior/semantics first; if exact source implementation shape does not fit mjlab APIs, use the smallest mjlab-native adaptation that keeps behavior equivalent.
+- In migration mode: no new fallback logic unless source has it, except for minimal guards explicitly required by mjlab/target API semantics.
+- In migration mode: no new `raise`/`assert` unless source has it, except for minimal checks explicitly required by mjlab/target API semantics.
 - In migration mode: keep original comments/TODOs; only do minimal mjlab wording updates when necessary.
 - In migration mode: keep source function boundaries, call order, and config semantics.
 - In migration mode: keep source-specific semantic names (for example `hack_generator`) unless forced field mapping is required.
@@ -70,5 +71,7 @@
 
 - IsaacLab-specific extension files are usually not kept (for example `ui_extension_example.py`, extension manifests, Omni UI scaffolding).
 - Migration can change internal implementation due to API differences, but end behavior must remain equivalent.
-- In authoring mode, prefer local mjlab docs plus nearest existing task example before inventing new abstractions.
+- In authoring mode, resolve references in this order: target repo -> local `mjlab/` checkout if present -> bundled skill references -> online docs only if still blocked.
+- In authoring mode, prefer local/bundled mjlab docs plus nearest existing task example before inventing new abstractions.
+- Do not bulk-read the whole upstream docs tree into context; open only exact pages/files needed after the bundled references are exhausted.
 - In authoring mode, prefer the smallest matching recipe/edit surface before creating new files or helper layers.

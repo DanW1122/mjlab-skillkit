@@ -10,7 +10,16 @@ Applicable scenarios:
 - creating reward / observation / event / termination / command / curriculum / metrics terms
 - creating an RL config or task registration
 
-## Which local docs to read first when authoring
+## Which docs to read first when authoring
+
+Reference order:
+
+1. target project files you are actually editing
+2. local `mjlab/` docs/code if a checkout exists in the workspace
+3. bundled skill references such as `references/mjlab-api-*.md`, `references/mjlab-mdp-builtins.md`, and `references/mjlab-authoring-recipes.md`
+4. official online docs only if the local checkout and bundled references are both insufficient
+
+Do not load or paste the entire upstream docs tree into context. Use the bundled references as the main working set, then open only the exact upstream page or code file still needed for a missing signature/example.
 
 Base must-reads:
 
@@ -35,9 +44,15 @@ Add by feature:
 - Training: `mjlab/docs/source/training/rsl_rl.rst`
 - Mesh / STL / OBJ assets: `references/mjlab-mesh-import-guidelines.md`
 
+If there is no local `mjlab/` checkout, do not stop; use the bundled references first and only ask for an upstream path when exact source signatures/examples are still needed.
+
 ## Pick the closest official example first
 
 Do not start from a blank file. Pick the closest existing task first:
+
+- target project task/config already near the requested feature
+- then local `mjlab/` example if present
+- then bundled skill references if no local checkout is available
 
 - Velocity / locomotion-like tasks: `mjlab/src/mjlab/tasks/velocity/`
 - Tracking / reference-motion tasks: `mjlab/src/mjlab/tasks/tracking/`

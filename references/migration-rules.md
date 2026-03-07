@@ -83,12 +83,13 @@ Migration priority:
 - Do not omit original logic steps, function boundaries, call order, or config items.
 - Do not introduce unsupported helper abstractions (extra inheritance, wrapper layers, merging/splitting functions, major reordering).
 - If mjlab interface differences prevent literal one-to-one transport, minimal implementation differences are allowed, but behavior must stay equivalent and the final code must be mjlab-native.
+- Prioritize behavioral/semantic equivalence over literal source control-flow shape; when exact transport is impossible, choose the smallest mjlab-native implementation that preserves the same task behavior.
 - Do not perform structural rewrites purely for style reasons.
 - Explicitly reject compatibility layers: do not add compatibility layers, adapter shims, or bridge wrappers.
 - Manager configuration must use the official dict style (`dict[str, XxxTermCfg]`); do not keep nested manager `@configclass` patterns.
 - Fallback/guard logic must stay aligned with source behavior: keep it if the source has it; do not add it if the source does not.
-- If the source project has no fallback logic, do not add any fallback branches (including broad `try/except`, `hasattr` branches, or silent degradation to defaults).
-- Do not add `raise`/`assert` statements that do not exist in the source project; only preserve exception/assertion behavior that already exists in the migration source.
+- If the source project has no fallback logic, do not add any fallback branches (including broad `try/except`, `hasattr` branches, or silent degradation to defaults), unless mjlab/target API requirements force a minimal guard for correctness.
+- Do not add `raise`/`assert` statements that do not exist in the source project, unless mjlab/target API requirements force a minimal check for correctness; otherwise only preserve exception/assertion behavior that already exists in the migration source.
 - Do not modify upstream mjlab source; migrated code must live in your target project and depend on mjlab as a dependency.
 - After migration, clean up all Isaac/IsaacLab interface residue.
 - By default, do not keep Isaac Sim UI extension-related entry points or dependencies (`omni.*` / `isaacsim.*` project scaffolding layers).

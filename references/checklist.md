@@ -46,10 +46,11 @@
 - Check whether `scale_rewards_by_dt`, `is_finite_horizon`, `metrics`, and similar mjlab EnvCfg semantics must be set/preserved explicitly.
 - Do not migrate Isaac Sim UI extension code (for example `omni.ext` / `omni.ui` example entry points).
 - Keep rewards/observations/actions/commands/reset/termination/curriculum behavior equivalent.
+- If exact source control flow cannot be preserved because of mjlab API differences, confirm the chosen implementation is the smallest mjlab-native variant that preserves the same behavior.
 - Keep fallback logic exactly aligned with the source implementation (do not add more, do not lose existing behavior).
-- If the source project has no fallback logic, confirm there is no newly added broad `try/except`, `hasattr` fallback branch, or silent fallback-to-default behavior.
+- If the source project has no fallback logic, confirm there is no newly added broad `try/except`, `hasattr` fallback branch, or silent fallback-to-default behavior, unless mjlab/target API semantics explicitly require a minimal guard.
 - Confirm there is no newly added compatibility/bridge layer code (compat/adapter/shim/wrapper for the old API).
-- If the source project has no `raise`/`assert`, confirm there are no extra exceptions or assertions added.
+- If the source project has no `raise`/`assert`, confirm there are no extra exceptions or assertions added unless mjlab/target API semantics explicitly require a minimal check.
 - Preserve original comments/TODOs; if comments receive mjlab terminology updates, only replace terms/API names, not meaning.
 
 ## Post-Migration Cleanup

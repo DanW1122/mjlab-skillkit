@@ -9,6 +9,8 @@ alwaysApply: false
 
 - Use `mujocolab/anymal_c_velocity` as the migration pattern.
 - This skill can also author new mjlab-native code directly.
+- Resolve references in this order: target repo -> local `mjlab/` checkout if present -> bundled skill references -> online docs only if still blocked.
+- Do not block authoring just because the workspace has no `mjlab/` directory.
 - Do not modify `mujocolab/mjlab` source.
 - In migration mode, keep behavior equivalent for rewards/obs/actions/commands/reset/termination/curriculum.
 - Final implementation must be mjlab-native.
@@ -25,4 +27,4 @@ alwaysApply: false
   - `mjlab.managers` for manager term configs
   - `mjlab.envs.mdp` for built-in action/obs/reward/event/metric/termination helpers
   - `mjlab.sensor` / `mjlab.sim` / `mjlab.terrains` / `mjlab.rl` / `mjlab.tasks.registry` for domain-specific replacements
-  - nearest local task example for new mjlab authoring
+  - nearest target-repo or local task example for new mjlab authoring

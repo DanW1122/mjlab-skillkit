@@ -1,6 +1,6 @@
 ---
 name: isaaclab-to-mjlab
-description: Use when asked to migrate IsaacLab projects to mjlab, compare IsaacLab and mjlab APIs, import meshes into mjlab tasks, or author new mjlab-native tasks/components directly from local mjlab docs and examples. Prefer mjlab public APIs, preserve behavior in migration mode, and avoid compatibility layers.
+description: Use when asked to migrate IsaacLab projects to mjlab, compare IsaacLab and mjlab APIs, import meshes into mjlab tasks, or author new mjlab-native tasks/components directly from local or bundled mjlab docs and examples. Prefer mjlab public APIs, preserve behavior in migration mode, and avoid compatibility layers.
 ---
 
 # IsaacLab to mjlab + mjlab Authoring
@@ -20,7 +20,20 @@ description: Use when asked to migrate IsaacLab projects to mjlab, compare Isaac
 - When writing new mjlab-native code, also read `references/mjlab-authoring-workflow.md`.
 - For common coding requests, read `references/mjlab-authoring-recipes.md` and follow the matching minimal recipe instead of exploring broadly.
 - Then load only the matching `references/mjlab-api-*.md` and `references/mjlab-mdp-builtins.md` files instead of reading the whole API surface at once.
+- Do not bulk-ingest the whole `mjlab/docs` tree or crawl large raw upstream doc sets into context; read only the exact page/signature/example you still need after using the bundled references.
 - Fall back to online docs only when local docs are missing or incomplete.
+
+## Reference Resolution Order
+
+- Treat raw paths such as `mjlab/docs/source/...` and `mjlab/src/mjlab/...` as preferred lookup targets only when a local `mjlab/` checkout exists.
+- If there is no local `mjlab/` checkout, use this skill's bundled references first:
+  - `references/mjlab-api-*.md`
+  - `references/mjlab-mdp-builtins.md`
+  - `references/mjlab-authoring-workflow.md`
+  - `references/mjlab-authoring-recipes.md`
+- If the user provides another local mjlab repo path, use that path as the upstream reference root instead of assuming `./mjlab`.
+- Use online docs / GitHub only as a last resort for exact upstream signatures or examples missing from both the local checkout and bundled references.
+- Do not block `author` mode just because the current workspace has no `mjlab/` directory.
 
 ## Working Modes
 
@@ -49,8 +62,9 @@ If the user does not specify a mode, infer it from the request:
 ## Shared Workflow
 
 1. Confirm whether the task is `migrate` or `author`.
-2. Read `references/mjlab-api-pack.md` and lock target APIs.
-3. Read `references/mjlab-api-index.md`, then load only the relevant module references:
+2. Resolve references in this order: target repo -> local `mjlab/` checkout if present -> bundled skill references -> online docs only if still blocked.
+3. Read `references/mjlab-api-pack.md` and lock target APIs.
+4. Read `references/mjlab-api-index.md`, then load only the relevant module references:
    - `references/mjlab-api-envs.md`
    - `references/mjlab-api-scene.md`
    - `references/mjlab-api-sim.md`
@@ -63,8 +77,8 @@ If the user does not specify a mode, infer it from the request:
    - `references/mjlab-api-rl.md`
    - `references/mjlab-api-viewer.md`
    - `references/mjlab-api-tasks.md`
-4. If the request involves importing STL / OBJ / other mesh assets, also read `references/mjlab-mesh-import-guidelines.md`.
-5. Reuse native mjlab patterns from existing tasks in target repo and mjlab repo.
+5. If the request involves importing STL / OBJ / other mesh assets, also read `references/mjlab-mesh-import-guidelines.md`.
+6. Reuse native mjlab patterns from existing tasks in the target repo first, then from a local `mjlab/` checkout if present, then from bundled references.
 
 ## Migration Workflow
 
@@ -93,7 +107,10 @@ If the user does not specify a mode, infer it from the request:
    - new `EnvCfg` or scene
    - new manager terms / MDP helpers
    - new sensors / terrain / RL config / registration
-4. Choose the closest local example before writing:
+4. Choose the closest example before writing:
+   - target-repo example first
+   - then local `mjlab/` example if available
+   - then bundled skill references if no local `mjlab/` checkout exists
    - velocity-style -> `mjlab/src/mjlab/tasks/velocity/`
    - tracking-style -> `mjlab/src/mjlab/tasks/tracking/`
 5. Build the config in mjlab-native order:
@@ -140,12 +157,13 @@ If the user does not specify a mode, infer it from the request:
 
 - Preserve behavior equivalence for rewards, observations, actions, commands, reset/events, terminations, and curriculum.
 - Keep function boundaries, call order, and config semantics aligned with source unless mjlab API differences require minimal internal changes.
+- Prioritize functional/semantic equivalence over literal code-shape equivalence; if mjlab API constraints prevent a one-to-one implementation, use the smallest mjlab-native adaptation that preserves behavior.
 - Do not drop source logic steps, config items, or execution order.
 - Remove Isaac/IsaacLab API residue (imports, symbols, stale comments, legacy fields).
 - Keep source-specific semantic names (for example `hack_generator`) unless forced field mapping is required.
 - Do not keep IsaacLab/Omniverse extension scaffolding by default (`ui_extension_example.py`, `config/extension.toml`, `omni.*` extension files).
-- Do not add new `raise` or `assert` if the source task has none.
-- Do not add fallback logic if the source task has none (no broad `try/except`, no `hasattr`-style fallback branches, no silent degradations).
+- Do not add new `raise` or `assert` if the source task has none, unless a minimal check is explicitly required by mjlab/target API semantics for correctness.
+- Do not add fallback logic if the source task has none (no broad `try/except`, no `hasattr`-style fallback branches, no silent degradations), unless a minimal guard is explicitly required by mjlab/target API semantics for correctness.
 - Keep original comments/TODOs. If wording must change, only do minimal mjlab terminology updates while preserving meaning.
 
 ## Authoring Constraints
