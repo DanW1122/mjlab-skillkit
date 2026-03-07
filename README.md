@@ -7,48 +7,6 @@
 - **IsaacLab Migration Skill** — port IsaacLab projects into clean, mjlab-native implementations while preserving task behavior.
 - **mjlab Native Skill** — author new mjlab-native tasks, configs, sensors, RL wiring, and mesh workflows directly from local or bundled mjlab docs and examples.
 
-> Previously branded as `isaaclab-to-mjlab`.
-
-## Positioning
-
-- **One skill kit, two high-value workflows** — migration for existing IsaacLab codebases, native authoring for new mjlab development.
-- **mjlab-native output only** — no compatibility layers, no bridge wrappers, no upstream mjlab source modifications.
-- **AI-assistant friendly** — packaged references, install adapters, and on-demand API guidance for real coding sessions.
-
-## Skill Suite
-
-### 1) IsaacLab Migration Skill
-
-Use this skill when the job is to move an IsaacLab environment, task, or project into `mjlab` without losing behavioral intent.
-
-- Preserves parity for rewards, observations, actions, commands, reset/events, terminations, and curriculum.
-- Maps IsaacLab concepts to mjlab APIs, managers, sensors, terrains, RL config, and task registration.
-- Enforces mjlab-native outputs instead of compatibility shims.
-- Includes migration rules, API mappings, gotchas, checklists, and complex-task playbooks.
-
-### 2) mjlab Native Skill
-
-Use this skill when the job is to build new mjlab-native code directly.
-
-- Authors new tasks, `EnvCfg` / scene configs, manager terms, sensors, terrain setup, RL config, and task registration.
-- Reuses local mjlab examples first, bundled references second, online docs only as a last resort.
-- Supports direct mesh-import and asset authoring workflows.
-- Helps assistants write code that already matches mjlab structure and public APIs.
-
-## What’s Included
-
-- **Migration references** — rules, mappings, patterns, gotchas, checklist, and task migration playbooks.
-- **mjlab API pack** — focused docs for envs, managers, scene, sensors, simulation, terrains, RL, viewer, and tasks.
-- **Authoring workflow** — step-by-step native mjlab guidance for new code.
-- **Assistant adapters** — installation surfaces for Codex, Claude Code, Gemini CLI, Cursor, and OpenCode.
-
-## Who It’s For
-
-- Teams migrating IsaacLab task stacks to `mjlab`
-- Engineers building new `mjlab` environments from scratch
-- AI-assisted coding workflows that need precise, bounded mjlab guidance
-- Internal platform or research teams standardizing mjlab development patterns
-
 ## Installation
 
 ### Interactive Mode
@@ -100,6 +58,40 @@ bash scripts/install.sh --tool cursor --project /path/to/your/project
 | OpenCode | `--tool opencode` | `~/.config/opencode/skills/mjlab-skillkit/` or `<project>/.opencode/skills/mjlab-skillkit/` |
 
 > `codex`, `claude`, and `gemini` install to global user paths by default. `cursor` and `opencode` also support `--project` for project-local installs.
+
+## Skill Suite
+
+### 1) IsaacLab Migration Skill
+
+Use this skill when the job is to move an IsaacLab environment, task, or project into `mjlab` without losing behavioral intent.
+
+- Preserves parity for rewards, observations, actions, commands, reset/events, terminations, and curriculum.
+- Maps IsaacLab concepts to mjlab APIs, managers, sensors, terrains, RL config, and task registration.
+- Enforces mjlab-native outputs instead of compatibility shims.
+- Includes migration rules, API mappings, gotchas, checklists, and complex-task playbooks.
+
+### 2) mjlab Native Skill
+
+Use this skill when the job is to build new mjlab-native code directly.
+
+- Authors new tasks, `EnvCfg` / scene configs, manager terms, sensors, terrain setup, RL config, and task registration.
+- Reuses local mjlab examples first, bundled references second, online docs only as a last resort.
+- Supports direct mesh-import and asset authoring workflows.
+- Helps assistants write code that already matches mjlab structure and public APIs.
+
+## What’s Included
+
+- **Migration references** — rules, mappings, patterns, gotchas, checklist, and task migration playbooks.
+- **mjlab API pack** — focused docs for envs, managers, scene, sensors, simulation, terrains, RL, viewer, and tasks.
+- **Authoring workflow** — step-by-step native mjlab guidance for new code.
+- **Assistant adapters** — installation surfaces for Codex, Claude Code, Gemini CLI, Cursor, and OpenCode.
+
+## Who It’s For
+
+- Teams migrating IsaacLab task stacks to `mjlab`
+- Engineers building new `mjlab` environments from scratch
+- AI-assisted coding workflows that need precise, bounded mjlab guidance
+- Internal platform or research teams standardizing mjlab development patterns
 
 ## Scope
 
