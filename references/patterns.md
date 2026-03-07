@@ -1,10 +1,10 @@
-# mjlab 迁移模式
+# mjlab Migration Patterns
 
-以下模式仅作模板，需按目标仓库的命名与 import 路径调整。
+The patterns below are templates only. Adjust names and import paths to the target repository.
 
-## 目录结构模板（二选一）
+## Directory Layout Templates (Choose One)
 
-`preserve-layout`（保留原结构）示例：
+`preserve-layout` example (keep the original layout):
 
 ```text
 your_repo/
@@ -13,10 +13,10 @@ your_repo/
     mdp/
       observations.py
       rewards.py
-    registry.py   # 在这里接入 mjlab 任务注册（或项目既有注册入口）
+    registry.py   # hook mjlab task registration here (or the project's existing registration entrypoint)
 ```
 
-`mjlab-layout`（直接 mjlab 化）示例：
+`mjlab-layout` example (convert directly into an mjlab-style layout):
 
 ```text
 your_repo/
@@ -32,9 +32,9 @@ your_repo/
           assets/
 ```
 
-## 配置风格迁移模板（`@configclass` -> `dict`）
+## Config Style Migration Template (`@configclass` -> `dict`)
 
-Isaac Lab（示意）：
+Isaac Lab (schematic):
 
 ```python
 @configclass
@@ -43,7 +43,7 @@ class RewardsCfg:
   motion_global_anchor_ori = RewTerm(func=mdp.b, weight=0.5, params={})
 ```
 
-mjlab（示意）：
+mjlab (schematic):
 
 ```python
 rewards = {
@@ -52,13 +52,13 @@ rewards = {
 }
 ```
 
-同样规则适用于 `observations/actions/commands/terminations/events/curriculum`。
+The same rule applies to `observations/actions/commands/terminations/events/curriculum`.
 
-官方约束：以上是 manager 配置的标准写法，迁移时必须采用，不保留 manager `@configclass`。
+Official constraint: this is the standard manager-config style, and you must use it during migration; do not keep manager `@configclass` definitions.
 
-## 0. 项目入口与注册（对齐 anymal_c_velocity）
+## 0. Project Entrypoint and Registration (Aligned with anymal_c_velocity)
 
-`pyproject.toml` 示例：
+`pyproject.toml` example:
 
 ```toml
 [project]
@@ -68,7 +68,7 @@ dependencies = ["mjlab>=1.1.0"]
 your_task_pkg = "your_task_pkg"
 ```
 
-`__init__.py` 注册示例：
+`__init__.py` registration example:
 
 ```python
 from mjlab.register import register_mjlab_task
@@ -82,7 +82,7 @@ register_mjlab_task(
 )
 ```
 
-## 0.1 Contact 传感器接线（官方页常见模式）
+## 0.1 Contact Sensor Wiring (Common Pattern from the Official Docs)
 
 ```python
 from dataclasses import replace
@@ -101,7 +101,7 @@ self_collision_sensor = ContactSensorCfg(
 robot_cfg = replace(robot_cfg, sensors=(self_collision_sensor,))
 ```
 
-## 1. Manager 工厂函数
+## 1. Manager Factory Functions
 
 ```python
 from dataclasses import dataclass, field
@@ -129,7 +129,7 @@ def make_observations() -> dict[str, ObservationGroupCfg]:
   }
 ```
 
-## 2. Scene Dataclass 桥接
+## 2. Scene Dataclass Bridging
 
 ```python
 from dataclasses import dataclass
@@ -170,7 +170,7 @@ class TaskEnvCfg(ProjectRlEnvCfg):
     self.sim.mujoco.timestep = 1.0 / 50.0 / self.decimation
 ```
 
-## 4. 继承链展开
+## 4. Flatten Inheritance Chains
 
 ```python
 def make_base_rewards() -> dict[str, RewardTermCfg]:

@@ -1,83 +1,105 @@
-# 迁移检查清单
+# Migration Checklist
 
-## 编辑前
+## Before Editing
 
-- 确认源任务路径和目标路径。
-- 确认用户选择的目录结构模式：`preserve-layout` 或 `mjlab-layout`。
-- 根据仓库规范确认迁移范围和不可编辑区域。
-- 确认 `mujocolab/mjlab` 源码目录是只读参考，不在本次编辑范围内。
-- 阅读 `references/docs-interface-diff.md`，确认本次迁移覆盖接口差异点。
-- 阅读 `references/mjlab-api-pack.md`，确认要用到的模块在 mjlab 官方 API 列表内。
-- 阅读 `references/official-migrating-from-isaaclab.md` 并确认本次 case 没有违背其边界说明。
-- 明确本次迁移采用官方 manager 配置：`dict[str, XxxTermCfg]`（不保留 manager `@configclass`）。
-- 明确 IsaacLab 工程特有脚手架是否保留；默认答案应为“不保留”。
-- 确认目标模块风格（dataclass + dict-manager，或该项目约定的等价风格）。
-- 明确迁移目标是“mjlab 原生实现 + 行为等价”，不是“代码形态逐行一致”。
+- Confirm the source task path and target path.
+- Confirm the directory layout mode chosen by the user: `preserve-layout` or `mjlab-layout`.
+- Confirm the migration scope and protected/non-editable areas according to repository rules.
+- Confirm that the `mujocolab/mjlab` source tree is read-only reference material and outside the current edit scope.
+- Read `references/docs-interface-diff.md` and confirm which interface differences this migration must cover.
+- Read `references/mjlab-api-pack.md` and confirm the modules you will use are in the official mjlab API list.
+- Read `references/official-migrating-from-isaaclab.md` and confirm the current case does not violate its boundary notes.
+- Scan `references/migration-gotchas.md` first to avoid basic pitfalls.
+- If STL / OBJ / other mesh assets are involved: read `references/mjlab-mesh-import-guidelines.md`.
+- If this is a multi-variant / command-heavy / play-eval-sensitive task: read `references/complex-task-migration-playbook.md`.
+- If this is a tracking / whole-body-tracking task: read `references/tracking-case-study.md`.
+- If this is a complex task: list the source variants / target variants matrix before touching code.
+- Make explicit that this migration uses official manager configuration style: `dict[str, XxxTermCfg]` (do not keep manager `@configclass`).
+- Decide explicitly whether IsaacLab project-specific scaffolding is preserved; the default answer should be “no”.
+- Confirm the target module style (dataclass + dict-manager, or the project’s equivalent convention).
+- Make explicit that the migration target is “mjlab-native implementation + behavioral equivalence”, not “line-by-line code shape equivalence”.
 
-## 迁移中
+## During Migration
 
-- 保持一比一函数映射与调用顺序。
-- 保留注释与 TODO 语义。
-- 若模式为 `mjlab-layout`：对齐 `anymal_c_velocity` 组织方式（独立任务包 + `mjlab.tasks` entry point + `register_mjlab_task`）。
-- 若模式为 `preserve-layout`：保持原目录树，仅迁移 API/配置语义和注册接线。
-- 对照相似 `mjlab/**` 实现并沿用现有表达方式。
-- 若接口差异导致无法一比一搬运，允许内部实现调整，但必须收敛到 mjlab 原生 API。
-- 把 Isaac Lab 的 `@configclass` manager 逐项改为 `dict[str, XxxTermCfg]`。
-- 覆盖全部 manager：`rewards/observations/actions/commands/terminations/events/curriculum`。
-- 若目标风格要求 dict manager，则把 manager 定义改为工厂函数返回字典。
-- 若是 dataclass EnvCfg/SceneCfg 路径，确认 manager 字段全部用 `field(default_factory=make_xxx)` 初始化。
-- 确认未使用桥接工具：`manager_terms_to_dict`、`AttrDict`、`observation_terms_from_class`。
-- 用 mjlab 等价字段/import 替换 IsaacLab 专有接口（注意 `RlEnv` 命名细节）。
-- 将 `InteractiveSceneCfg` + `prim_path` 思路替换为 `SceneCfg` + `entities/sensors`。
-- Contact 传感器优先迁移到 `mjlab.utils.spec_config.ContactSensorCfg`（或项目等价封装）。
-- 检查是否需要显式设置/保留 `scale_rewards_by_dt`、`is_finite_horizon`、`metrics` 等 mjlab EnvCfg 字段语义。
-- 不迁移 Isaac Sim UI extension 代码（如 `omni.ext` / `omni.ui` 示例入口）。
-- 保持 rewards/observations/actions/commands/reset/termination/curriculum 行为等价。
-- 保持兜底逻辑与源实现一致（不多加、不漏加）。
-- 当源工程没有兜底时，确认没有新增 `try/except` 宽泛包裹、`hasattr` 兜底分支、静默默认值回退。
-- 确认没有新增兼容层/桥接层代码（compat/adapter/shim/wrapper for old API）。
-- 当源工程没有 `raise`/`assert` 时，确认没有新增额外异常抛出或断言。
-- 保留原注释/TODO；若做注释 mjlab 化改写，仅允许术语/API 名替换，不改语义。
+- Preserve one-to-one function mapping and call order.
+- Preserve comments and TODO semantics.
+- If the mode is `mjlab-layout`: align with `anymal_c_velocity` organization (standalone task package + `mjlab.tasks` entry point + `register_mjlab_task`).
+- If the mode is `preserve-layout`: keep the original directory tree and only migrate API/config semantics plus registration wiring.
+- Compare against similar `mjlab/**` implementations and reuse existing expression patterns.
+- If the source task has multiple variants (for example no-state-estimation / low-freq / play variants), verify them one by one; do not migrate only the main variant and silently ignore the rest.
+- If the target repository already has tests for the same task family, copy their assertions into a migration contract and keep checking against it throughout the migration.
+- If interface differences prevent literal one-to-one transport, internal implementation adjustments are allowed, but the result must converge to native mjlab APIs.
+- Convert Isaac Lab manager `@configclass` structures term by term into `dict[str, XxxTermCfg]`.
+- Cover all managers: `rewards/observations/actions/commands/terminations/events/curriculum`.
+- If the target style requires dict-based managers, rewrite manager definitions as factory functions that return dicts.
+- If the path uses dataclass EnvCfg/SceneCfg, confirm all manager fields are initialized with `field(default_factory=make_xxx)`.
+- Confirm none of these bridge tools are used: `manager_terms_to_dict`, `AttrDict`, `observation_terms_from_class`.
+- Replace IsaacLab-specific interfaces with mjlab-equivalent fields/imports (including `RlEnv` naming details).
+- Replace the `InteractiveSceneCfg` + `prim_path` mindset with `SceneCfg` + `entities/sensors`.
+- Prefer migrating contact sensors to `mjlab.utils.spec_config.ContactSensorCfg` (or the project’s equivalent wrapper).
+- If mesh assets participate in collision, explicitly separate visual mesh from collision representation; for non-convex collision geometry, prefer convex decomposition or multiple primitive / convex geoms.
+- If there is a fixed-base entity, confirm the reset event actually places it at the corresponding `scene.env_origins` location instead of leaving it at the world origin.
+- If the source contains cross-entity assembly (tendon / rope / worldbody-level structure), evaluate whether it should move to `SceneCfg.spec_fn`; do not force it into a single entity cfg.
+- If action slicing or actuator semantics depend on `model.ctrl` order, explicitly verify whether default actuator declaration order or `EntityCfg.sort_actuators=True` matches the source behavior.
+- For contact-sensitive tasks, confirm whether `ContactSensorCfg.history_length` should align with `decimation`.
+- For tracking tasks, explicitly verify that `anchor_body_name`, `body_names`, `pose_range`, `velocity_range`, and `joint_position_range` were migrated completely.
+- Check whether `scale_rewards_by_dt`, `is_finite_horizon`, `metrics`, and similar mjlab EnvCfg semantics must be set/preserved explicitly.
+- Do not migrate Isaac Sim UI extension code (for example `omni.ext` / `omni.ui` example entry points).
+- Keep rewards/observations/actions/commands/reset/termination/curriculum behavior equivalent.
+- Keep fallback logic exactly aligned with the source implementation (do not add more, do not lose existing behavior).
+- If the source project has no fallback logic, confirm there is no newly added broad `try/except`, `hasattr` fallback branch, or silent fallback-to-default behavior.
+- Confirm there is no newly added compatibility/bridge layer code (compat/adapter/shim/wrapper for the old API).
+- If the source project has no `raise`/`assert`, confirm there are no extra exceptions or assertions added.
+- Preserve original comments/TODOs; if comments receive mjlab terminology updates, only replace terms/API names, not meaning.
 
-## 迁移后清理
+## Post-Migration Cleanup
 
-- 删除过期 import 和无用转换/兼容辅助函数。
-- 确认没有 Isaac/IsaacLab 残留（import、符号、注释、旧字段名）。
-- 确认没有改动 `mujocolab/mjlab` 源码文件。
-- 确认最终目录组织与用户选定模式一致。
-- 确认 manager 配置已符合目标 mjlab 原生风格（不保留 class-wrapper 桥接）。
-- 确认没有 manager `@configclass` 残留，且 manager 最终注入值均为字典。
-- 确认未保留 IsaacLab extension 脚手架文件（例如 `ui_extension_example.py`、`config/extension.toml`）。
-- 确认原注释仍在（含 TODO），仅发生必要的 mjlab 术语替换。
-- 确认最终实现是 mjlab 原生代码路径，不依赖 IsaacLab 兼容壳层。
-- 确认源项目特有语义命名仍保留（如 `hack_generator`），除非是强制字段映射重命名。
+- Remove stale imports and unused conversion/compatibility helpers.
+- Confirm there is no Isaac/IsaacLab residue left (imports, symbols, comments, old field names).
+- Confirm no `mujocolab/mjlab` source files were modified.
+- Confirm the final directory organization matches the user-selected mode.
+- Confirm manager configuration now follows the target mjlab-native style (without class-wrapper bridges).
+- Confirm there is no remaining manager `@configclass`, and all final injected manager values are dicts.
+- Confirm IsaacLab extension scaffolding files are not retained (for example `ui_extension_example.py`, `config/extension.toml`).
+- Confirm original comments still exist (including TODOs), with only necessary mjlab terminology replacement.
+- Confirm the final implementation is a mjlab-native code path that does not depend on an IsaacLab compatibility shell.
+- Confirm source-project-specific semantic names are still preserved (for example `hack_generator`) unless forced field remapping required renaming.
 
-## 验证
+## Validation
 
-- 对修改过的 Python 文件运行 `python -m py_compile <changed_file>.py`。
-- 验证 manager 字段初始化正确（适用时使用 `field(default_factory=make_xxx)`）。
-- 验证 EnvCfg 注入的是 manager 字典对象，而不是 manager class 实例。
-- 验证运行时环境类与配置类命名已正确替换：`RLEnv` -> `RlEnv`。
-- 验证仅保留 MuJoCo 相关仿真配置，且无 PhysX/render_interval/physics_material 遗留。
-- 验证任务注册符合目标项目约定，并优先使用 `register_mjlab_task` + `mjlab.tasks` entry point。
-- 验证训练/评估入口使用正确 task id 和 env cfg（按项目组织选择注册或直接构造）。
-- 运行一次关键字排查，确认迁移目标代码中没有非必要 `omni.` / `isaacsim.` 依赖残留。
-- 运行一次关键字排查，确认没有新增兜底痕迹（如 `hasattr(`、宽泛 `except Exception`、静默 `return default`）。
-- 运行一次关键字排查，确认没有新增异常/断言痕迹（`raise `、`assert `）超出源工程范围。
+- Run `python -m py_compile <changed_file>.py` on modified Python files.
+- Validate manager field initialization is correct (use `field(default_factory=make_xxx)` where applicable).
+- Validate EnvCfg injects manager dict objects, not manager class instances.
+- Validate runtime env and config class naming has been replaced correctly: `RLEnv` -> `RlEnv`.
+- Validate only MuJoCo-related simulation config remains, with no PhysX/render_interval/physics_material leftovers.
+- Validate task registration follows target-project conventions, preferring `register_mjlab_task` + `mjlab.tasks` entry points.
+- Validate training/evaluation entry points use the correct task id and env cfg (registered or directly constructed, depending on project organization).
+- If the source task has play/no-state-estimation/low-freq or other derived modes, validate whether the target side has equivalent entry points or explicitly record the “not yet migrated” difference.
+- If mesh is used for collision, validate that raw non-convex STL/OBJ was not treated as a single collision shape, and validate that contact/reward/sensor logic hits the correct geom names.
+- If the source has env-level heterogeneous mesh / geom / asset differences, validate the target did not incorrectly assume “each env can have a different `MjModel`”.
+- If the task depends on command initial state right after reset, validate command reset-resample semantics remain equivalent.
+- If the target project has `play_env_cfg`, validate play configuration separately; do not validate only the training env.
+- If the target repository already has related tests, check their assertions one by one at minimum.
+- Run one keyword scan to confirm there are no unnecessary `omni.` / `isaacsim.` dependencies left in the migration target code.
+- Run one keyword scan to confirm no new fallback traces were added (such as `hasattr(`, broad `except Exception`, or silent `return default`).
+- Run one keyword scan to confirm no new exception/assertion traces (`raise `, `assert `) were added beyond the source project’s scope.
 
-## 行为等价闸门
+## Behavioral Equivalence Gate
 
-- 奖励项与权重等价。
-- 观测项、顺序与 corruption 行为等价。
-- 动作缩放和 actuator 映射等价。
-- 命令采样与参数范围等价。
-- reset/event 随机化与终止条件等价。
-- curriculum 推进逻辑等价。
-- 若实现细节与源代码不同，逐项给出“差异点 -> 等价性依据”。
+- Reward terms and weights are equivalent.
+- Observation terms, order, and corruption behavior are equivalent.
+- Action scaling and actuator mapping are equivalent.
+- Command sampling and parameter ranges are equivalent.
+- Reset/event randomization and termination conditions are equivalent.
+- Curriculum progression logic is equivalent.
+- Additional validation for tracking tasks: reference-action sampling mode, anchor/body alignment, state-estimation-trimmed variant, and number of registered variants are equivalent.
+- Additional validation for tracking / imitation tasks: in play mode, confirm RSI/randomization is disabled and `sampling_mode` is switched to the target-expected value.
+- For complex tasks: additionally validate that `play / eval / no-state-estimation / low-freq / robot-specific` variants were not silently dropped.
+- If implementation details differ from the source code, provide “difference -> equivalence basis” item by item.
 
-## 卡住时
+## If You Get Stuck
 
-- 先查 `mujocolab/mjlab` 的 `src/mjlab/tasks/`。
-- 仍无法覆盖时到官方渠道反馈：
-  - Issues：`https://github.com/mujocolab/mjlab/issues`
-  - Discussions：`https://github.com/mujocolab/mjlab/discussions`
+- First check `mujocolab/mjlab` under `src/mjlab/tasks/`.
+- If it is still not covered, report back through official channels:
+  - Issues: `https://github.com/mujocolab/mjlab/issues`
+  - Discussions: `https://github.com/mujocolab/mjlab/discussions`

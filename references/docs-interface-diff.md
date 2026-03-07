@@ -1,10 +1,10 @@
-# 本地 docs 接口差异（mjlab vs IsaacLab）
+# Local Docs Interface Differences (mjlab vs IsaacLab)
 
-本文件基于本地文档对照提炼接口差异，优先级高于零散经验规则。
+This file distills interface differences from local documentation comparisons. It takes precedence over scattered rule-of-thumb migration notes.
 
-## 本次对照的本地文档
+## Local Docs Compared in This Round
 
-`mjlab`：
+`mjlab`:
 
 - `mjlab/docs/source/migration_isaac_lab.rst`
 - `mjlab/docs/source/environment_config.rst`
@@ -14,7 +14,7 @@
 - `mjlab/docs/source/api/managers.rst`
 - `mjlab/docs/source/api/tasks.rst`
 
-`IsaacLab`：
+`IsaacLab`:
 
 - `IsaacLab/docs/source/tutorials/03_envs/create_manager_rl_env.rst`
 - `IsaacLab/docs/source/tutorials/03_envs/register_rl_env_gym.rst`
@@ -23,97 +23,97 @@
 - `IsaacLab/docs/source/api/lab/isaaclab.scene.rst`
 - `IsaacLab/docs/source/setup/quickstart.rst`
 
-## 接口差异总览
+## Interface Differences at a Glance
 
-## 1) 环境类命名
+## 1) Environment Class Naming
 
-- IsaacLab：
-  - 运行时环境类：`ManagerBasedRLEnv`
-  - 配置类：`ManagerBasedRLEnvCfg`
-- mjlab：
-  - 运行时环境类：`ManagerBasedRlEnv`
-  - 配置类：`ManagerBasedRlEnvCfg`
+- IsaacLab:
+  - Runtime environment class: `ManagerBasedRLEnv`
+  - Config class: `ManagerBasedRLEnvCfg`
+- mjlab:
+  - Runtime environment class: `ManagerBasedRlEnv`
+  - Config class: `ManagerBasedRlEnvCfg`
 
-迁移要点：`RLEnv` -> `RlEnv` 的命名变化要全量替换。
+Migration note: rename `RLEnv` -> `RlEnv` everywhere.
 
-## 2) Manager 配置结构（强制）
+## 2) Manager Config Structure (Mandatory)
 
-- IsaacLab：常见为嵌套 `@configclass`（如 `RewardsCfg`, `ObservationsCfg`）。
-- mjlab：`ManagerBasedRlEnvCfg` 中直接注入 manager 字典：
+- IsaacLab: commonly uses nested `@configclass` definitions (for example `RewardsCfg`, `ObservationsCfg`).
+- mjlab: injects manager dictionaries directly into `ManagerBasedRlEnvCfg`:
   - `observations: dict[str, ObservationGroupCfg]`
   - `actions: dict[str, ActionTermCfg]`
   - `rewards: dict[str, RewardTermCfg]`
-  - `terminations/events/commands/curriculum/metrics` 也都是字典。
+  - `terminations/events/commands/curriculum/metrics` are also dictionaries.
 
-迁移要点：所有 manager 必须改为 `dict[str, XxxTermCfg]`，不保留 manager `@configclass`。
+Migration note: all managers must become `dict[str, XxxTermCfg]`; do not keep manager `@configclass` definitions.
 
-## 3) Scene/世界建模方式
+## 3) Scene / World Modeling Style
 
-- IsaacLab：`InteractiveSceneCfg` + `prim_path` + `ENV_REGEX_NS` 克隆场景。
-- mjlab：`SceneCfg` + `entities/sensors`，无 USD `prim_path` 体系。
-  - scene 组合时会给实体自动加前缀命名空间（例如 `robot/base_link`）。
+- IsaacLab: clones scenes with `InteractiveSceneCfg` + `prim_path` + `ENV_REGEX_NS`.
+- mjlab: uses `SceneCfg` + `entities/sensors`, with no USD `prim_path` system.
+  - During scene composition, entities are automatically prefixed with namespaces (for example `robot/base_link`).
 
-迁移要点：彻底移除 `prim_path`/USD 场景图思路，改为 MuJoCo 场景组合表达。
+Migration note: remove `prim_path` / USD scene-graph thinking completely and switch to MuJoCo scene composition.
 
-## 4) 传感器接口
+## 4) Sensor Interface
 
-- IsaacLab：`isaaclab.sensors.ContactSensorCfg`（与 prim 体系绑定）。
-- mjlab：优先 `mjlab.utils.spec_config.ContactSensorCfg`（官方迁移页推荐），也可能使用项目封装的 `mjlab.sensor.ContactSensorCfg`。
+- IsaacLab: `isaaclab.sensors.ContactSensorCfg` (bound to the prim hierarchy).
+- mjlab: prefer `mjlab.utils.spec_config.ContactSensorCfg` (recommended by the official migration page), though project wrappers such as `mjlab.sensor.ContactSensorCfg` may also appear.
 
-迁移要点：contact 传感器通常挂在机器人配置（例如 `replace(robot_cfg, sensors=(sensor,))`）。
+Migration note: contact sensors are typically attached to the robot config (for example `replace(robot_cfg, sensors=(sensor,))`).
 
-## 5) 注册与任务发现
+## 5) Registration and Task Discovery
 
-- IsaacLab：`gym.register(...)` + `gym.make(...)` 是主流教程路径。
-- mjlab：`register_mjlab_task(...)` 注册任务，`task_id` 绑定 `env_cfg/play_env_cfg/rl_cfg/runner_cls`。
+- IsaacLab: `gym.register(...)` + `gym.make(...)` is the mainstream tutorial path.
+- mjlab: registers tasks with `register_mjlab_task(...)`, where `task_id` binds `env_cfg/play_env_cfg/rl_cfg/runner_cls`.
 
-迁移要点：优先 `register_mjlab_task`；不要通过修改 `mjlab` 上游源码硬编码任务。
+Migration note: prefer `register_mjlab_task`; do not hardcode tasks by editing upstream `mjlab` source.
 
-## 6) 训练入口与参数覆盖
+## 6) Training Entrypoints and Parameter Overrides
 
-- IsaacLab：常见 `isaaclab.sh -p scripts/...`，并通过 gym task id 启动。
-- mjlab：常见 `uv run train <TaskId>` / `uv run play <TaskId>`。
-  - CLI 通过 `tyro` 覆盖配置，参数使用连字符（`--num-envs`）。
-  - 布尔参数要求显式 `True/False`。
+- IsaacLab: commonly uses `isaaclab.sh -p scripts/...`, launched through a gym task id.
+- mjlab: commonly uses `uv run train <TaskId>` / `uv run play <TaskId>`.
+  - The CLI uses `tyro` for config overrides, with hyphenated flags (for example `--num-envs`).
+  - Boolean arguments require explicit `True/False`.
 
-迁移要点：把原训练脚本入口切换到 mjlab 训练/播放命令体系。
+Migration note: move the original training entrypoint into mjlab's train/play command flow.
 
-## 7) 额外配置语义（mjlab 文档明确）
+## 7) Additional Config Semantics (Explicit in mjlab Docs)
 
-`ManagerBasedRlEnvCfg` 中常用但在 IsaacLab 迁移时容易遗漏的字段：
+Frequently used `ManagerBasedRlEnvCfg` fields that are easy to miss during IsaacLab migration:
 
 - `is_finite_horizon`
-- `scale_rewards_by_dt`（默认会按 `step_dt` 缩放奖励）
-- `metrics` manager（字典）
-- 默认 `events` 常含 `reset_scene_to_default`
+- `scale_rewards_by_dt` (rewards are scaled by `step_dt` by default)
+- `metrics` manager (dictionary)
+- default `events` often include `reset_scene_to_default`
 
-迁移要点：迁移时明确这些字段语义，不要只迁 rewards/obs/actions。
+Migration note: make these field semantics explicit during migration; do not migrate only rewards / obs / actions.
 
-## 8) 工程脚手架差异
+## 8) Project Scaffolding Differences
 
-- IsaacLab 工程里常见 `omni.*`/`isaacsim.*` 的 extension/UI 脚手架。
-- mjlab 迁移默认不需要这类脚手架。
+- IsaacLab projects often include `omni.*` / `isaacsim.*` extension and UI scaffolding.
+- mjlab migrations do not need that scaffolding by default.
 
-迁移要点：`ui_extension_example.py`、`config/extension.toml` 等默认不保留（除非用户明确要求）。
+Migration note: files such as `ui_extension_example.py` and `config/extension.toml` are usually not kept unless the user explicitly asks for them.
 
-## 9) 兜底与注释策略（迁移纪律）
+## 9) Fallback and Comment Policy (Migration Discipline)
 
-- 源工程没有兜底时，不新增兜底分支。
-- 兜底行为必须一比一对齐源逻辑，不能额外加“保险代码”。
-- 原注释与 TODO 必须保留；仅允许最小必要的 mjlab 化术语替换。
-- 明确拒绝兼容层：不新增 compat/adapter/shim 桥接代码。
-- 源工程没有的 `raise`/`assert` 不新增。
+- If the source project has no fallback branch, do not add one.
+- Fallback behavior must match the source logic one-for-one; do not add extra "safety code".
+- Keep original comments and TODOs; only make minimal terminology substitutions for mjlab.
+- Explicitly reject compatibility layers: do not add compat / adapter / shim bridge code.
+- Do not add `raise` / `assert` statements that do not exist in the source project.
 
-## 10) “mjlab 化 + 等价性”原则
+## 10) "mjlab-native + Equivalence" Principle
 
-- 迁移目标是 mjlab 原生实现，不是保留 IsaacLab 代码形态。
-- 因接口差异出现内部实现变化是允许的。
-- 判定标准不是“写法是否一样”，而是“最终功能与行为是否一致”。
-- 若出现实现差异，必须在迁移说明中记录差异点和等价性依据。
+- The migration target is a native mjlab implementation, not preserving IsaacLab code shape.
+- Internal implementation changes caused by interface differences are allowed.
+- The success criterion is not "does the code look the same", but "are the final function and behavior equivalent".
+- If implementation differs, record the differences and the equivalence rationale in the migration notes.
 
-## 迁移执行建议
+## Recommended Migration Procedure
 
-1. 先按本文件做接口级清单对照，再开始代码改写。
-2. 每改完一个 manager，立即验证其最终注入类型是字典。
-3. 每改完一个 scene/sensor 模块，立即排查 `prim_path`/`ENV_REGEX_NS`/`omni.` 残留。
-4. 完成后执行 `references/checklist.md` 的全量核对。
+1. First use this file as an interface-level checklist, then start rewriting code.
+2. After each manager rewrite, immediately verify that the final injected type is a dictionary.
+3. After each scene / sensor rewrite, immediately check for leftover `prim_path` / `ENV_REGEX_NS` / `omni.` references.
+4. After completion, run the full verification in `references/checklist.md`.

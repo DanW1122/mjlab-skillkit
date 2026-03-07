@@ -7,13 +7,33 @@
 
 ## Overview
 
-This repository provides a production-oriented skill library for migrating IsaacLab-only projects to mjlab.
+This repository provides a production-oriented skill library for migrating IsaacLab-only projects to mjlab and for authoring new mjlab-native code directly.
 
-The objective is to preserve task behavior while converting implementation details to native mjlab patterns.
+The objective is to preserve task behavior during migration while also making it practical to write new mjlab tasks, configs, manager terms, sensors, RL configs, and registration code from local docs/examples.
+
+It now also ships a modular **mjlab API skill pack** distilled from local `mjlab/docs`, so the agent can load only the relevant API domain during migration (envs, managers, sensors, terrains, RL, task registry, etc.).
+
+## Why this is AI-friendly
+
+- **English-first agent-facing docs** so Codex/Claude/Gemini/Cursor/OpenCode can consume the guidance consistently.
+- **Load-on-demand references** so the agent reads only the API slice it needs instead of a monolithic wall of documentation.
+- **Compressed migration gotchas** for the highest-value pitfalls that are easy to miss during IsaacLab -> mjlab ports.
+- **Authoring recipes** for common requests like “add a reward”, “add a sensor”, “register a task”, or “import a mesh”.
+- **Case-study + playbook split** so complex-task guidance stays generic, while tracking remains only a concrete example.
+
+## Refreshed against newer mjlab changes
+
+The skill pack now also calls out several newer/upstream mjlab behaviors that are easy to miss when porting older examples:
+
+- `EventTermCfg(mode="step")` and related event semantics such as `is_global_time` / `min_step_count_between_reset`
+- `EntityCfg.sort_actuators` when control ordering must follow joint/tendon/site definition order
+- `MetricsTermCfg(func=mdp.mean_action_acc)` in newer upstream velocity-style tasks
+- newer RSL-RL model config conventions (`stochastic`, `init_noise_std`, `noise_std_type`)
 
 ## Scope
 
 - Migrate IsaacLab projects to **mjlab-native** code paths.
+- Write new **mjlab-native** tasks/components/configurations directly.
 - Preserve behavior parity for rewards, observations, actions, commands, reset/events, terminations, and curriculum.
 - Avoid compatibility layers.
 - Do not modify `mujocolab/mjlab` upstream source code.
@@ -147,6 +167,12 @@ isaaclab-to-mjlab/
 ├── SKILL.md
 ├── agents/openai.yaml
 ├── references/
+│   ├── mjlab-api-pack.md
+│   ├── mjlab-api-index.md
+│   ├── mjlab-authoring-workflow.md
+│   ├── mjlab-authoring-recipes.md
+│   ├── mjlab-api-*.md
+│   └── mjlab-mdp-builtins.md
 ├── shared/isaaclab-to-mjlab-rules.md
 ├── adapters/cursor/isaaclab-to-mjlab.mdc
 └── scripts/

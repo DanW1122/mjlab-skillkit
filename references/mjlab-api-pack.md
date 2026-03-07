@@ -1,114 +1,90 @@
-# mjlab API 迁移包（本地 docs 提炼）
+# mjlab API Migration Pack (distilled from local docs)
 
-本文件汇总本地 `mjlab/docs/source/api/*.rst` 的公开模块和核心类/函数，用于迁移时“先选官方 API，再写代码”。
+This file is the **quick entry point**: use it to lock in the major modules first, then read the more detailed domain-specific reference files. That lets you treat the `mjlab` API as a set of skill-style subpackages loaded on demand, instead of reading the entire API surface at once.
 
-## 来源（本地）
+It serves both **IsaacLab -> mjlab migration** and **direct mjlab-native authoring**.
 
-- `mjlab/docs/source/api/index.rst`
-- `mjlab/docs/source/api/envs.rst`
-- `mjlab/docs/source/api/scene.rst`
-- `mjlab/docs/source/api/sim.rst`
-- `mjlab/docs/source/api/entity.rst`
-- `mjlab/docs/source/api/actuator.rst`
-- `mjlab/docs/source/api/sensor.rst`
-- `mjlab/docs/source/api/managers.rst`
-- `mjlab/docs/source/api/terrains.rst`
-- `mjlab/docs/source/api/rl.rst`
-- `mjlab/docs/source/api/viewer.rst`
-- `mjlab/docs/source/api/tasks.rst`
+## What to read first
 
-## 模块总览
+1. `references/docs-interface-diff.md`: confirm the interface differences between IsaacLab and mjlab first.
+2. `references/mjlab-api-pack.md`: lock in the top-level categories first.
+3. `references/mjlab-api-index.md`: choose the precise API domain by problem.
+4. Load only the matching `references/mjlab-api-*.md` files plus `references/mjlab-mdp-builtins.md`.
+5. If you are writing new mjlab code, also read `references/mjlab-authoring-workflow.md`.
 
-- `mjlab.envs`
-- `mjlab.scene`
-- `mjlab.sim`
-- `mjlab.entity`
-- `mjlab.actuator`
-- `mjlab.sensor`
-- `mjlab.managers`
-- `mjlab.terrains`
-- `mjlab.rl`
-- `mjlab.viewer`
-- `mjlab.tasks`
+## mjlab API overview
 
-## 迁移最常用 API（优先）
+- `mjlab.envs`: environment shell, `ManagerBasedRlEnvCfg`
+- `mjlab.scene`: `SceneCfg`, entity / sensor assembly
+- `mjlab.managers`: `*TermCfg` for each manager family
+- `mjlab.envs.mdp`: common action / observation / reward / event / metric / termination / dr helpers
+- `mjlab.sensor`: contact / raycast / camera / builtin sensors
+- `mjlab.sim`: `SimulationCfg`, `MujocoCfg`
+- `mjlab.entity`: runtime entities and data access
+- `mjlab.actuator`: actuator families
+- `mjlab.terrains`: flat / generator / curriculum terrain
+- `mjlab.rl`: runners, wrappers, PPO configs
+- `mjlab.viewer`: native / viser / offscreen
+- `mjlab.tasks.registry`: task registration and loading
 
-## 1) 环境
+## Most commonly used APIs during migration (priority order)
+
+### 1) Environment skeleton
 
 - `mjlab.envs.ManagerBasedRlEnv`
 - `mjlab.envs.ManagerBasedRlEnvCfg`
-- `mjlab.envs.VecEnvObs`
-- `mjlab.envs.VecEnvStepReturn`
 
-## 2) 场景
+### 2) Scene and entity wiring
 
-- `mjlab.scene.Scene`
 - `mjlab.scene.SceneCfg`
+- `mjlab.terrains.TerrainEntityCfg`
+- `mjlab.entity.EntityCfg`
 
-## 3) manager 相关
+### 3) Manager dictionary configuration
 
-- `mjlab.managers.SceneEntityCfg`
-- `mjlab.managers.ActionTermCfg`
 - `mjlab.managers.ObservationGroupCfg`
 - `mjlab.managers.ObservationTermCfg`
+- `mjlab.managers.ActionTermCfg`
 - `mjlab.managers.RewardTermCfg`
 - `mjlab.managers.TerminationTermCfg`
+- `mjlab.managers.EventTermCfg`
 - `mjlab.managers.CommandTermCfg`
 - `mjlab.managers.CurriculumTermCfg`
-- `mjlab.managers.EventTermCfg`
 - `mjlab.managers.MetricsTermCfg`
 
-迁移规则：以上 term cfg 在 EnvCfg 中以字典注入，不使用 manager `@configclass`。
+Migration rule: every manager must ultimately be injected into EnvCfg as `dict[str, XxxTermCfg]`, with no manager `@configclass` left behind.
 
-## 4) 传感器
+### 4) Common built-in terms / helpers
 
-- `mjlab.sensor.ContactSensorCfg`
-- `mjlab.sensor.ContactMatch`
-- `mjlab.sensor.RayCastSensorCfg`
-- `mjlab.sensor.CameraSensorCfg`
+- `mjlab.envs.mdp.actions.*`
+- `mjlab.envs.mdp.observations.*`
+- `mjlab.envs.mdp.rewards.*`
+- `mjlab.envs.mdp.events.*`
+- `mjlab.envs.mdp.metrics.*` (newer upstream mjlab)
+- `mjlab.envs.mdp.terminations.*`
+- `mjlab.envs.mdp.dr.*`
 
-说明：若迁移路径使用官方迁移页推荐，也可在具体任务中用 `mjlab.utils.spec_config.ContactSensorCfg` 做接线。
-
-## 5) 仿真
-
-- `mjlab.sim.SimulationCfg`
-- `mjlab.sim.MujocoCfg`
-
-常见配置落点：`sim.mujoco.timestep/iterations/ls_iterations`。
-
-## 6) 地形
-
-- `mjlab.terrains.TerrainEntityCfg`
-- `mjlab.terrains.TerrainGeneratorCfg`
-- 以及各类子地形配置（heightfield 与 box primitive 系列）
-
-## 7) 训练与 runner
+### 5) Training and registration
 
 - `mjlab.rl.MjlabOnPolicyRunner`
 - `mjlab.rl.RslRlVecEnvWrapper`
 - `mjlab.rl.RslRlOnPolicyRunnerCfg`
-- `mjlab.rl.RslRlPpoAlgorithmCfg`
-- `mjlab.rl.RslRlModelCfg`
+- `mjlab.tasks.registry.register_mjlab_task`
 
-## 8) viewer
+## Which sub-reference to read when
 
-- `mjlab.viewer.ViewerConfig`
-- `mjlab.viewer.NativeMujocoViewer`
-- `mjlab.viewer.ViserPlayViewer`
-- `mjlab.viewer.OffscreenRenderer`
+- Environment fields / dataclass structure: `references/mjlab-api-envs.md`
+- Scene / entities / `env_origins`: `references/mjlab-api-scene.md`
+- Manager term configs: `references/mjlab-api-managers.md`
+- Common action / observation / reward / event / metric / termination helpers: `references/mjlab-mdp-builtins.md`
+- Contact / raycast / camera: `references/mjlab-api-sensor.md`
+- MuJoCo simulation parameters / DR: `references/mjlab-api-sim.md`
+- Terrain generators / curriculum: `references/mjlab-api-terrains.md`
+- Training runner / wrapper / PPO: `references/mjlab-api-rl.md`
+- Task registration / task ids / `load_*`: `references/mjlab-api-tasks.md`
 
-## 9) 任务注册
+## Usage suggestions
 
-- `mjlab.tasks.register_mjlab_task`
-- `mjlab.tasks.list_tasks`
-- `mjlab.tasks.load_env_cfg`
-- `mjlab.tasks.load_rl_cfg`
-- `mjlab.tasks.load_runner_cls`
-
-迁移规则：优先 `register_mjlab_task`，不要修改 mjlab 上游源码做硬编码注册。
-
-## 使用建议
-
-1. 每次迁移前先从本文件选定将使用的 API 模块。
-2. 若代码里出现未在本文件或本地 docs 中出现的“自定义桥接层”依赖，先停下来确认是否必要。
-3. 若本地 docs 与历史代码冲突，优先按本地 docs 对齐，并在迁移说明中记录取舍。
+1. Lock the module choice first, then write code. Do not start by adding bridge layers.
+2. If IsaacLab API remnants appear, pick the official replacement module from `references/mjlab-api-index.md` first.
+3. If code depends on a “custom API” that does not appear in this pack or in local `mjlab/docs`, stop and confirm whether it is actually necessary.

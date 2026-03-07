@@ -1,44 +1,45 @@
-# Migrating from Isaac Lab（官方说明吸收版）
+# Migrating from Isaac Lab (Official Notes Digest)
 
-## 状态说明
+## Status Notes
 
-- 该迁移指南仍在持续更新（work in progress）。
-- 遇到未覆盖模式、边界条件或新 case，建议反馈到：
-  - Issues：`https://github.com/mujocolab/mjlab/issues`
-  - Discussions：`https://github.com/mujocolab/mjlab/discussions`
+- This migration guide is still being continuously updated (work in progress).
+- If you encounter an uncovered pattern, edge condition, or new case, consider reporting it to:
+  - Issues: `https://github.com/mujocolab/mjlab/issues`
+  - Discussions: `https://github.com/mujocolab/mjlab/discussions`
 
 ## TL;DR
 
-- 大多数 Isaac Lab 的 manager-based 任务配置可以通过小改动迁移到 mjlab。
-- 整体 MDP 结构不变：`rewards / observations / actions / commands / terminations / events / curriculum`。
-- 环境基类概念接近，但命名细节有差异（例如 `RlEnv` 命名）。
-- 最大差异是配置风格：
-  - Isaac Lab 偏向嵌套 `@configclass`
-  - mjlab 偏向 `dict[str, XxxTermCfg]`（可程序化构造、合并、生成）
-- 这类迁移以“机械改写”为主，不是逻辑重写。
+- Most manager-based Isaac Lab task configurations can be migrated to mjlab with relatively small changes.
+- The overall MDP structure stays the same: `rewards / observations / actions / commands / terminations / events / curriculum`.
+- The environment base-class concept is similar, but naming details differ (for example `RlEnv` naming).
+- The biggest difference is configuration style:
+  - Isaac Lab leans toward nested `@configclass`
+  - mjlab leans toward `dict[str, XxxTermCfg]` (which can be built, merged, and generated programmatically)
+- This kind of migration is mainly “mechanical rewriting”, not logic redesign.
+- If you only want the easiest high-value pitfalls first, read: `references/migration-gotchas.md`
 
-## 关键差异
+## Key Differences
 
-## 1) Import 与命名风格
+## 1) Import and Naming Style
 
-常见示例：
+Common example:
 
 ```python
 # Isaac Lab
 from isaaclab.envs import ManagerBasedRLEnv
 
-# mjlab（运行时 + 配置）
+# mjlab (runtime + config)
 from mjlab.envs import ManagerBasedRlEnv, ManagerBasedRlEnvCfg
 ```
 
-- 注意 `RlEnv` 的命名细节（`Rl` 而非 `RL`）。
-- 迁移时区分：
-  - 运行时环境类：`ManagerBasedRLEnv` -> `ManagerBasedRlEnv`
-  - 配置类：`ManagerBasedRLEnvCfg` -> `ManagerBasedRlEnvCfg`
+- Pay attention to the `RlEnv` naming detail (`Rl`, not `RL`).
+- During migration, distinguish:
+  - runtime environment class: `ManagerBasedRLEnv` -> `ManagerBasedRlEnv`
+  - configuration class: `ManagerBasedRLEnvCfg` -> `ManagerBasedRlEnvCfg`
 
-## 2) 配置结构：`@configclass` -> 字典
+## 2) Configuration Structure: `@configclass` -> Dicts
 
-Isaac Lab：
+Isaac Lab:
 
 ```python
 @configclass
@@ -47,7 +48,7 @@ class RewardsCfg:
   motion_global_anchor_ori = RewTerm(...)
 ```
 
-mjlab：
+mjlab:
 
 ```python
 rewards = {
@@ -56,17 +57,17 @@ rewards = {
 }
 ```
 
-- 该模式对全部 manager 都适用：`rewards / observations / actions / commands / terminations / events / curriculum`。
-- 设计背景可参考 mjlab PR：`#292`。
+- This pattern applies to all managers: `rewards / observations / actions / commands / terminations / events / curriculum`.
+- For design background, see mjlab PR: `#292`.
 
-## 3) Scene 配置简化为 MuJoCo 原生表达
+## 3) Scene Configuration Is Simplified into Native MuJoCo Expression
 
-- 不再依赖 Omniverse/USD 场景图，不再管理 `prim_path`。
-- 资产基于 MuJoCo（MJCF），并通过 MjSpec modifier dataclass 应用修改。
-- lights/materials/textures/sensors 在 `SceneCfg` 与 robot config 里表达。
-- `asset_name` 在迁移中统一为 `entity_name`。
+- It no longer depends on the Omniverse/USD scene graph and no longer manages `prim_path`.
+- Assets are based on MuJoCo (MJCF), with changes applied through MjSpec modifier dataclasses.
+- Lights/materials/textures/sensors are expressed in `SceneCfg` and robot config.
+- During migration, `asset_name` is normalized to `entity_name`.
 
-参考模式（简化示例）：
+Reference pattern (simplified example):
 
 ```python
 from dataclasses import replace
@@ -93,36 +94,109 @@ scene = SceneCfg(
 )
 ```
 
-## 对照学习样例
+## Study Examples
 
-- Isaac Lab 实现（Beyond Mimic）：`https://github.com/HybridRobotics/whole_body_tracking`
-- mjlab 对应实现：`https://github.com/mujocolab/mjlab`
+- Isaac Lab implementation (Beyond Mimic): `https://github.com/HybridRobotics/whole_body_tracking`
+- mjlab counterpart implementation: `https://github.com/mujocolab/mjlab`
+- General complex-task migration playbook compiled in this repo: `references/complex-task-migration-playbook.md`
+- Local close-reading comparison compiled in this repo: `references/tracking-case-study.md`
 
-重点对照：
+Key things to compare:
 
-- manager 字典如何镜像原 configclass 语义。
-- reward/observation/command/termination 逻辑如何保持一致。
-- scene/asset 如何用纯 MuJoCo 表达。
+- how manager dicts mirror original `configclass` semantics
+- how reward/observation/command/termination logic remains consistent
+- how scene/assets are expressed in pure MuJoCo
+- how target-repo tests encode variant completeness and play semantics as executable constraints
 
-## 迁移核对（官方思路）
+If you are migrating a complex task, read `references/complex-task-migration-playbook.md` first; if you are migrating tracking / imitation / whole-body control, then use `references/tracking-case-study.md` as a hands-on migration template.
 
-1. Base class 与 imports  
-将 Isaac Lab 的 import 替换为对应 mjlab import（命名大小写也要对齐）。
+### AI-Specific Reminder (General to Complex Tasks)
 
-2. Manager 配置  
-把每个 `@configclass` manager 变成 `dict[str, XxxTermCfg]`，并传入 `ManagerBasedRlEnvCfg` 或项目等价入口。
+- First split the task into four layers:
+  - base task env
+  - robot/task variant
+  - RL cfg
+  - registration / play entry
+- Draw a **variant matrix** before touching code; do not stare only at the main variant.
+- Verify both `env_cfg` and `play_env_cfg`:
+  - in mjlab, play is often an explicit config branch, not just a script parameter.
+- Read the target task’s `__init__.py` registration file together with related `tests/`:
+  - the registry tells you which entry points exist
+  - the tests tell you which behaviors are considered mandatory
+- First determine whether the central object is command / commands / the task-core runtime:
+  - if command handles resample / RSI / reference-state write-back,
+  - do not mechanically flatten source reset/events into target `events[...]`
+- `policy -> actor` and `privileged -> critic` are not just naming changes:
+  - you must also verify RL model inputs and term removal in no-state-estimation variants.
+- For low-freq / special-runner variants, do not inspect only env cfg:
+  - also verify `decimation`, `action_rate_l2`, `num_steps_per_env`, `gamma`, and `lam`.
 
-3. Scene 与 assets  
-用 `SceneCfg` + entities/sensors 替代 `InteractiveSceneCfg` + `prim_path` 体系。
+### Tracking-Case-Specific Reminder
 
-4. Sensors 与 contact  
-将 Isaac Lab 的 contact sensor 配置迁移到 `mjlab.utils.spec_config.ContactSensorCfg`（或项目提供的等价封装），并挂到机器人配置。
+- For tracking tasks, you can directly treat `mjlab/tests/test_tracking_task.py` as an acceptance template:
+  - the `motion` command must exist
+  - the `self_collision` sensor must exist
+  - play mode must disable RSI and switch to `sampling_mode="start"`
 
-5. RL 入口与注册  
-确认训练/评估入口使用正确 task id 与 env cfg。根据项目组织选择 `register_mjlab_task`、entry point 或项目既有注册器。
+## Migration Verification (Official Mindset)
 
-## 实战建议
+1. Base classes and imports
+Replace Isaac Lab imports with the corresponding mjlab imports (including exact capitalization/naming).
 
-- 先对齐 physics 与 observations，再处理视觉相关效果。
-- 卡住时优先查看 `mjlab` 仓库中的 `src/mjlab/tasks/` 现成任务。
-- 若官方文档未覆盖当前 case，直接发 issue/discussion，避免在项目内发明私有兼容层。
+2. Manager configuration
+Convert each manager `@configclass` into `dict[str, XxxTermCfg]`, then pass it into `ManagerBasedRlEnvCfg` or the project’s equivalent entry point.
+
+3. Scene and assets
+Use `SceneCfg` + entities/sensors instead of the `InteractiveSceneCfg` + `prim_path` system.
+
+4. Sensors and contact
+Migrate Isaac Lab contact-sensor configuration to `mjlab.utils.spec_config.ContactSensorCfg` (or the project’s equivalent wrapper), then attach it to robot config.
+
+5. RL entry points and registration
+Confirm training/evaluation entry points use the correct task id and env cfg. Depending on project organization, use `register_mjlab_task`, entry points, or the project’s existing registrar.
+
+6. Variant completeness
+If the source has derived modes such as no-state-estimation / low-freq / play / eval, confirm one by one whether the target side is:
+- already migrated as an independent task id
+- collapsed into function parameters
+- or explicitly documented as not yet migrated
+
+7. Validate play configuration separately
+For tasks with both training and evaluation entry points, do not validate only the training env; separately verify under play mode:
+- episode length
+- observation corruption
+- event randomization
+- command sampling mode
+- RSI/randomization ranges
+
+## Additional High-Value Differences Identified in This Comparison
+
+1. **Fixed-base entity placement depends on the reset event**
+
+   - In mjlab, fixed-base entities participate in multi-environment placement through mocap wrapping.
+   - That means “just putting the entity into the scene” is not enough; if the reset event is not wired correctly, it may remain at the world origin.
+
+2. **Current multi-environment execution shares the same `MjModel`**
+
+   - You can parallelize different states, but you cannot assume each env can use a different mesh / geom / kinematic tree.
+   - If the source task depends on env-level heterogeneous assets, migration requires explicit redesign.
+
+3. **Cross-entity assembly fits better in `SceneCfg.spec_fn`**
+
+   - For cross-entity tendons, shared sites, or worldbody-level auxiliary structures, do not force them back into a single entity cfg.
+   - That logic is closer to mjlab’s scene-level spec editing.
+
+4. **`history_length` for contact sensors often needs to align with `decimation`**
+
+   - For short-pulse contacts such as self-collision / illegal contact, policy reads may miss the contact entirely unless substep history is preserved.
+
+5. **Commands are force-resampled on reset**
+
+   - When migrating command-heavy tasks, do not only align `resampling_time_range`; also verify command initialization semantics at the reset boundary.
+
+## Practical Advice
+
+- Align physics and observations first, then handle visual effects.
+- When stuck, first inspect ready-made tasks in `mjlab` under `src/mjlab/tasks/`.
+- For tracking / imitation tasks, also inspect related `tests/` and treat test assertions as migration contracts.
+- If official docs do not cover the current case, open an issue/discussion directly rather than inventing a private compatibility layer inside the project.

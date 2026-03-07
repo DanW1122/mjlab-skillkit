@@ -1,4 +1,4 @@
 interface:
-  display_name: "IsaacLab -> mjlab Migration"
-  short_description: "Migrate IsaacLab-only projects to mjlab with strict parity"
-  default_prompt: "Use $isaaclab-to-mjlab to migrate this IsaacLab project to mjlab. Ask me to choose layout mode first (preserve-layout or mjlab-layout), enforce dict-based managers, remove IsaacLab residue, and keep behavior equivalent without compatibility layers."
+  display_name: "IsaacLab -> mjlab / mjlab Authoring"
+  short_description: "Migrate IsaacLab to mjlab or write mjlab-native code"
+  default_prompt: "Use $isaaclab-to-mjlab to either migrate an IsaacLab project to mjlab or author new mjlab-native code. First determine whether the task is migrate or author. For migration, ask for layout mode if needed (preserve-layout or mjlab-layout). For authoring, read the authoring workflow and authoring recipes first, then load only the matching local mjlab API references (envs/managers/scene/sensor/sim/terrains/rl/tasks), plus `mjlab.envs.mdp` helpers for actions/observations/rewards/events/metrics/terminations when relevant. Enforce dict-based managers, prefer public mjlab APIs and nearest local task examples, and avoid compatibility layers."
